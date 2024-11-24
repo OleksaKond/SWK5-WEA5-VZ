@@ -1,0 +1,11 @@
+.vs/
+packages/
+
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+project.lock.json
+project.fragment.lock.json
+artifacts/

@@ -1,5 +1,7 @@
-﻿using NextStop.Data.DataAccess;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NextStop.Services
 {
@@ -14,18 +16,55 @@ namespace NextStop.Services
             _routeRepo = routeRepo;
         }
 
-        public void PrintHolidayRoutes()
+        /// <summary>
+        /// Prints all routes that operate during holidays.
+        /// </summary>
+        public async Task PrintHolidayRoutesAsync()
         {
-            var holidays = _holidayRepo.GetAll();
-            var routes = _routeRepo.GetAll();
-
-            foreach (var holiday in holidays)
+            try
             {
-                Console.WriteLine($"Holiday: {holiday.Name} on {holiday.Date}");
-                foreach (var route in routes)
+                // Fetch holidays and routes asynchronously
+                var holidaysTask = _holidayRepo.GetAllAsync();
+                var routesTask = _routeRepo.GetAllAsync();
+
+                // Wait for both to complete
+                var holidays = await holidaysTask;
+                var routes = await routesTask;
+
+                if (!holidays.Any())
                 {
-                    Console.WriteLine($"Route: {route.Name} ({route.StartLocation} -> {route.EndLocation})");
+                    Console.WriteLine("No holidays found.");
+                    return;
                 }
+
+                if (!routes.Any())
+                {
+                    Console.WriteLine("No routes found.");
+                    return;
+                }
+
+                // Print routes that operate on holidays
+                foreach (var holiday in holidays)
+                {
+                    Console.WriteLine($"Holiday: {holiday.Description} ({holiday.StartDate:yyyy-MM-dd} to {holiday.EndDate:yyyy-MM-dd})");
+                    var holidayRoutes = routes.Where(route => route.OperatesOnHolidays).ToList();
+
+                    if (!holidayRoutes.Any())
+                    {
+                        Console.WriteLine("No routes operate on holidays.");
+                    }
+                    else
+                    {
+                        foreach (var route in holidayRoutes)
+                        {
+                            Console.WriteLine($"  Route {route.RouteNumber} operates during holidays.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
     }

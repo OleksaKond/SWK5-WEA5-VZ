@@ -1,37 +1,31 @@
-﻿using Microsoft.Data.SqlClient; // Use System.Data.SqlClient if that's your package
-using System;
+﻿using System;
+using System.Threading.Tasks;
+using NextStop.Services;
 
-class Program
+namespace NextStop
 {
-    static void Main()
+    class Program
     {
-        string connectionString = "Server=localhost,1433;Database=transport_db;User Id=sa;Password=Swk5-rocks!;TrustServerCertificate=True;";
-
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        static async Task Main(string[] args)
         {
-            try
-            {
-                connection.Open();
-                Console.WriteLine("Connection to the database was successful!");
+            Console.WriteLine("Welcome to the NextStop Scheduler!");
 
-                // Example query
-                string query = "SELECT * FROM Holidays";
+            // Define the connection string (update it to match your database setup)
+            string connectionString = "Server=localhost,1433;Database=transport_db;User Id=sa;Password=Swk5-rocks!;TrustServerCertificate=True;";
 
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Console.WriteLine($"Holiday: {reader["Name"]}, Date: {reader["Date"]}");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-            }
+            // Initialize repositories
+            var holidayRepo = new HolidayRepository(connectionString);
+            var routeRepo = new RouteRepository(connectionString);
+
+            // Initialize the service
+            var scheduleService = new ScheduleService(holidayRepo, routeRepo);
+
+            // Call the service method to print holiday routes
+            Console.WriteLine("\nFetching holiday routes...");
+            await scheduleService.PrintHolidayRoutesAsync();
+
+            Console.WriteLine("\nProcess complete. Press any key to exit.");
+            Console.ReadKey();
         }
     }
 }
