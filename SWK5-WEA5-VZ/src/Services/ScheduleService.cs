@@ -16,18 +16,13 @@ namespace NextStop.Services
             _routeRepo = routeRepo;
         }
 
-        /// <summary>
-        /// Prints all routes that operate during holidays.
-        /// </summary>
         public async Task PrintHolidayRoutesAsync()
         {
             try
             {
-                // Fetch holidays and routes asynchronously
                 var holidaysTask = _holidayRepo.GetAllAsync();
                 var routesTask = _routeRepo.GetAllAsync();
 
-                // Wait for both to complete
                 var holidays = await holidaysTask;
                 var routes = await routesTask;
 
@@ -43,7 +38,6 @@ namespace NextStop.Services
                     return;
                 }
 
-                // Print routes that operate on holidays
                 foreach (var holiday in holidays)
                 {
                     Console.WriteLine($"Holiday: {holiday.Description} ({holiday.StartDate:yyyy-MM-dd} to {holiday.EndDate:yyyy-MM-dd})");
